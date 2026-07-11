@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SummarizeAI — Free AI Content Summarizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0f0e;
+      --bg-card: #111715;
+      --bg-input: #0d1210;
+      --bg-result: #0f1a15;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --accent: #1D9E75;
+      --accent-dim: #12694e;
+      --accent-light: #5DCAA5;
+      --accent-bg: rgba(29,158,117,0.09);
+      --text-primary: #eef1f0;
+      --text-secondary: #7a9189;
+      --text-muted: #445c53;
+      --font: 'Sora', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+      --r: 12px;
+      --rsm: 8px;
+      --rpill: 999px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── NAV ── */
+    nav {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 2rem;
+      border-bottom: 0.5px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(11,15,14,0.9);
+      backdrop-filter: blur(14px);
+      z-index: 10;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon {
+      width: 33px; height: 33px; border-radius: 9px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon i { font-size: 17px; color: #fff; }
+    .logo-name { font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.3px; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-badge {
+      font-size: 11px; font-weight: 500; padding: 4px 11px;
+      border-radius: var(--rpill);
+      border: 0.5px solid rgba(29,158,117,0.35);
+      color: var(--accent-light); background: var(--accent-bg);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 4rem 1.5rem 2.5rem;
+      max-width: 620px; width: 100%;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; color: var(--accent-light);
+      background: var(--accent-bg); border: 0.5px solid rgba(29,158,117,0.3);
+      padding: 5px 13px; border-radius: var(--rpill); margin-bottom: 1.25rem;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 5vw, 40px); font-weight: 700; letter-spacing: -1px;
+      line-height: 1.15; margin-bottom: 1rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p { font-size: 15px; color: var(--text-secondary); line-height: 1.7; max-width: 460px; margin: 0 auto; }
+
+    /* ── MAIN CARD ── */
+    .main-card {
+      width: 100%; max-width: 780px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin: 0 1.5rem 3rem;
+    }
+
+    /* ── SECTION LABEL ── */
+    .slabel {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px;
+    }
+
+    /* ── MODES ── */
+    .mode-grid { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 1.75rem; }
+    .mode-btn {
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      padding: 7px 16px; border-radius: var(--rpill);
+      border: 0.5px solid var(--border); background: transparent;
+      color: var(--text-secondary); cursor: pointer;
+      transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+    }
+    .mode-btn i { font-size: 14px; }
+    .mode-btn:hover { border-color: var(--border-hover); color: var(--text-primary); background: rgba(255,255,255,0.03); }
+    .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ── SAMPLE CHIPS ── */
+    .chips-row { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .chip {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 5px 13px; border-radius: var(--rpill);
+      border: 0.5px solid var(--border); background: transparent;
+      color: var(--text-muted); cursor: pointer; transition: all 0.12s;
+    }
+    .chip:hover { border-color: var(--accent-light); color: var(--accent-light); }
+
+    /* ── INPUT ── */
+    .input-wrap { position: relative; margin-bottom: 1.25rem; }
+    textarea {
+      font-family: var(--font); font-size: 14px; line-height: 1.7;
+      width: 100%; min-height: 180px; resize: vertical;
+      padding: 14px 14px 32px;
+      background: var(--bg-input); color: var(--text-primary);
+      border: 0.5px solid var(--border); border-radius: var(--r);
+      outline: none; transition: border-color 0.15s;
+    }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(29,158,117,0.1); }
+    textarea::placeholder { color: var(--text-muted); }
+    .char-count {
+      position: absolute; bottom: 10px; right: 12px;
+      font-size: 11px; color: var(--text-muted); font-family: var(--mono);
+      pointer-events: none;
+    }
+
+    /* ── LENGTH SLIDER ── */
+    .slider-row { display: flex; align-items: center; gap: 14px; margin-bottom: 1.5rem; }
+    .slider-row label { font-size: 13px; color: var(--text-secondary); white-space: nowrap; }
+    input[type=range] {
+      flex: 1; accent-color: var(--accent);
+      height: 4px; cursor: pointer;
+    }
+    .slider-val {
+      font-size: 13px; font-weight: 500; font-family: var(--mono);
+      color: var(--accent-light); min-width: 36px; text-align: right;
+    }
+
+    /* ── BUTTONS ── */
+    .action-row { display: flex; gap: 10px; align-items: center; margin-bottom: 1.25rem; }
+    .btn-primary {
+      font-family: var(--font); font-size: 14px; font-weight: 600;
+      padding: 11px 24px; border-radius: var(--rsm); border: none;
+      background: var(--accent); color: #fff; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      padding: 11px 18px; border-radius: var(--rsm);
+      border: 0.5px solid var(--border); background: transparent;
+      color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.03); border-color: var(--border-hover); color: var(--text-primary); }
+
+    /* ── ERROR ── */
+    .error-box {
+      display: none; padding: 11px 14px; border-radius: var(--rsm);
+      border: 0.5px solid rgba(226,75,74,0.3); background: rgba(226,75,74,0.07);
+      color: #f09595; font-size: 13px; margin-bottom: 1.25rem;
+      align-items: center; gap: 8px;
+    }
+    .error-box.show { display: flex; }
+
+    /* ── PROCESSING ── */
+    .proc-bar-wrap {
+      display: none; height: 3px; background: rgba(255,255,255,0.05);
+      border-radius: 99px; overflow: hidden; margin-bottom: 1.25rem;
+    }
+    .proc-bar-wrap.show { display: block; }
+    .proc-bar {
+      height: 100%; width: 0%; background: var(--accent);
+      border-radius: 99px; transition: width 0.4s ease;
+    }
+    .proc-label {
+      display: none; font-size: 12px; color: var(--text-muted);
+      margin-bottom: 10px; font-family: var(--mono);
+    }
+    .proc-label.show { display: block; }
+
+    /* ── RESULT ── */
+    .result-section { display: none; }
+    .result-section.show { display: block; }
+
+    .result-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .result-label { display: flex; align-items: center; gap: 7px; }
+    .result-label i { font-size: 16px; color: var(--accent); }
+    .result-label span {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--text-muted);
+    }
+    .copy-btn {
+      font-family: var(--font); font-size: 12px; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--rsm);
+      border: 0.5px solid var(--border); background: transparent;
+      color: var(--text-secondary); cursor: pointer;
+      display: flex; align-items: center; gap: 5px; transition: all 0.12s;
+    }
+    .copy-btn:hover { border-color: var(--accent-light); color: var(--accent-light); }
+
+    .result-card {
+      background: var(--bg-result);
+      border: 0.5px solid rgba(29,158,117,0.18);
+      border-radius: var(--r); padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+    }
+    .result-text { font-size: 15px; line-height: 1.85; color: var(--text-primary); }
+    .result-text .highlight {
+      background: rgba(29,158,117,0.12);
+      border-left: 2px solid var(--accent);
+      padding: 2px 6px; border-radius: 3px;
+      display: block; margin-bottom: 6px;
+    }
+    .bullet-item {
+      display: flex; gap: 10px; margin-bottom: 8px; align-items: flex-start;
+    }
+    .bullet-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+      flex-shrink: 0; margin-top: 9px;
+    }
+
+    /* ── KEYWORD TAGS ── */
+    .keywords-wrap { margin-top: 1rem; }
+    .kw-label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px;
+    }
+    .kw-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .kw-tag {
+      font-size: 12px; padding: 3px 10px; border-radius: var(--rpill);
+      background: var(--accent-bg); border: 0.5px solid rgba(29,158,117,0.25);
+      color: var(--accent-light);
+    }
+
+    /* ── STATS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+      margin-top: 1rem;
+    }
+    .stat-card {
+      background: var(--bg-input); border: 0.5px solid var(--border);
+      border-radius: var(--rsm); padding: 12px; text-align: center;
+    }
+    .stat-val { font-size: 19px; font-weight: 600; color: var(--accent-light); font-family: var(--mono); }
+    .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 0.5px; background: var(--border); margin: 1.5rem 0; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      width: 100%; max-width: 780px;
+      padding: 0 1.5rem 3rem;
+    }
+    .how-title {
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      margin-bottom: 1rem; letter-spacing: -0.1px;
+    }
+    .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .how-card {
+      background: var(--bg-card); border: 0.5px solid var(--border);
+      border-radius: var(--r); padding: 1rem 1.1rem;
+    }
+    .how-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--accent-bg); border: 0.5px solid rgba(29,158,117,0.2);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+    }
+    .how-icon i { font-size: 16px; color: var(--accent-light); }
+    .how-card h3 { font-size: 13px; font-weight: 600; margin-bottom: 4px; color: var(--text-primary); }
+    .how-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ── FOOTER ── */
+    footer {
+      width: 100%; text-align: center; padding: 1.5rem;
+      border-top: 0.5px solid var(--border);
+      font-size: 12px; color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .main-card { padding: 1.25rem; margin: 0 0.75rem 2rem; }
+      .hero { padding: 2.5rem 1rem 1.5rem; }
+      nav { padding: 1rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .how-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <div class="logo-icon"><i class="ti ti-file-text"></i></div>
+      <span class="logo-name">SummarizeAI</span>
+    </a>
+    <div class="nav-right">
+      <span class="nav-badge"><i class="ti ti-cpu" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>100% Free · No API Needed</span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag"><i class="ti ti-brain" style="font-size:13px"></i> In-Browser AI Summarization</div>
+    <h1>Turn long content into<br /><span>instant clarity</span></h1>
+    <p>Paste any article, document, or text and get a smart AI-powered summary instantly — no API key, no sign-up, no internet required after load.</p>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div class="main-card">
+
+    <!-- MODES -->
+    <div class="slabel">Summary mode</div>
+    <div class="mode-grid">
+      <button class="mode-btn active" data-mode="concise"><i class="ti ti-arrows-minimize"></i> Concise</button>
+      <button class="mode-btn" data-mode="detailed"><i class="ti ti-list-details"></i> Detailed</button>
+      <button class="mode-btn" data-mode="bullets"><i class="ti ti-list"></i> Bullet Points</button>
+      <button class="mode-btn" data-mode="keywords"><i class="ti ti-tags"></i> Key Insights</button>
+      <button class="mode-btn" data-mode="tldr"><i class="ti ti-bolt"></i> TL;DR</button>
+    </div>
+
+    <!-- SAMPLES -->
+    <div class="slabel">Try a sample</div>
+    <div class="chips-row">
+      <button class="chip" data-sample="tech"><i class="ti ti-cpu" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>Tech article</button>
+      <button class="chip" data-sample="science"><i class="ti ti-microscope" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>Science paper</button>
+      <button class="chip" data-sample="business"><i class="ti ti-chart-bar" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>Business report</button>
+      <button class="chip" data-sample="history"><i class="ti ti-book" style="font-size:12px;vertical-align:-1px;margin-right:3px"></i>History</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- TEXTAREA -->
+    <div class="slabel">Your content</div>
+    <div class="input-wrap">
+      <textarea id="inputText" placeholder="Paste your article, document, essay, or any text here...&#10;&#10;The AI will analyze it and produce a smart summary using natural language processing — all inside your browser."></textarea>
+      <span class="char-count" id="charCount">0 words</span>
+    </div>
+
+    <!-- SUMMARY LENGTH -->
+    <div class="slider-row">
+      <label>Summary length</label>
+      <input type="range" id="lengthSlider" min="1" max="5" step="1" value="3" />
+      <span class="slider-val" id="sliderLabel">Medium</span>
+    </div>
+
+    <!-- ERROR -->
+    <div class="error-box" id="errorBox">
+      <i class="ti ti-alert-circle" style="font-size:16px;flex-shrink:0"></i>
+      <span id="errorMsg"></span>
+    </div>
+
+    <!-- PROCESSING -->
+    <div class="proc-label" id="procLabel">Analyzing text…</div>
+    <div class="proc-bar-wrap" id="procBarWrap">
+      <div class="proc-bar" id="procBar"></div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="action-row">
+      <button class="btn-primary" id="summarizeBtn">
+        <i class="ti ti-sparkles"></i> Summarize
+      </button>
+      <button class="btn-ghost" id="clearBtn">Clear</button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-section" id="resultSection">
+      <div class="result-header">
+        <div class="result-label">
+          <i class="ti ti-check-circle"></i>
+          <span>Summary</span>
+        </div>
+        <button class="copy-btn" id="copyBtn"><i class="ti ti-copy"></i> Copy</button>
+      </div>
+      <div class="result-card">
+        <div class="result-text" id="resultText"></div>
+      </div>
+
+      <div class="keywords-wrap" id="keywordsWrap">
+        <div class="kw-label">Top Keywords</div>
+        <div class="kw-tags" id="kwTags"></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="statOrig">—</div>
+          <div class="stat-lbl">Original words</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statSum">—</div>
+          <div class="stat-lbl">Summary words</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statSents">—</div>
+          <div class="stat-lbl">Sentences kept</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statReduced">—</div>
+          <div class="stat-lbl">Reduction</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main-card -->
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-title">How it works</div>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-icon"><i class="ti ti-chart-dots"></i></div>
+        <h3>TF-IDF Scoring</h3>
+        <p>Every word is scored by how often it appears in this document vs. how common it is generally — surfacing what's truly important.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-icon"><i class="ti ti-sort-descending"></i></div>
+        <h3>Sentence Ranking</h3>
+        <p>Each sentence is ranked by the total importance score of its words. The top-scoring sentences become your summary.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-icon"><i class="ti ti-arrows-sort"></i></div>
+        <h3>Order Preserved</h3>
+        <p>Selected sentences are returned in their original order so the summary reads naturally, just like the source text.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Built with in-browser NLP — no server, no API, no data sent anywhere &nbsp;·&nbsp; SummarizeAI
+  </footer>
+
+  <script>
+    // ── SAMPLE TEXTS ──────────────────────────────────────────────────────────
+    const samples = {
+      tech: `Artificial intelligence is rapidly transforming the technology landscape across every major industry. Large language models, powered by transformer architectures first introduced in 2017, have enabled machines to generate human-like text, write functional code, and produce creative content indistinguishable from human output. Companies like OpenAI, Anthropic, Google DeepMind, and Meta AI are racing to develop more capable and aligned AI systems, investing billions of dollars in research and infrastructure. The economic impact of generative AI is estimated to be in the trillions of dollars over the next decade, with significant disruption expected across knowledge work industries including law, medicine, finance, and software engineering. Researchers are also grappling with fundamental safety challenges: ensuring these systems behave reliably and truthfully, avoid harmful outputs, and remain aligned with human values even as they grow more capable. Regulation is beginning to catch up with the technology. The European Union AI Act establishes the first comprehensive legal framework for AI governance globally, requiring transparency, risk assessments, and mandatory human oversight for high-risk applications. In the United States, executive orders and congressional hearings are exploring voluntary commitments and potential legislation. Meanwhile, the open-source AI movement is democratizing access to frontier-class capabilities, allowing smaller organizations, researchers, and individual developers to experiment with powerful models without massive infrastructure investment. The debate over whether AI will create more jobs than it displaces remains genuinely unsettled among economists, though most agree that a major structural shift in the global labor market is already underway, with white-collar knowledge workers facing disruption on a scale not seen since the industrial revolution.`,
+      science: `A landmark study published in Nature Climate Change reveals that global average temperatures have risen by 1.2 degrees Celsius above pre-industrial levels, with the past decade being the hottest on record in over 125,000 years of climate history. Researchers analyzed ice core samples, deep ocean sediment data, tree ring records, and atmospheric CO2 measurements spanning 800,000 years to construct the most comprehensive climate reconstruction ever attempted. The data conclusively shows that the current rate of warming is unprecedented in at least the last 66 million years, dramatically outpacing even the Paleocene-Eocene Thermal Maximum event. Arctic amplification — the well-documented phenomenon where polar regions warm two to four times faster than the global average — is dramatically accelerating ice sheet melt across Greenland and Antarctica. This contributes to projected sea level rises of between 0.5 and 1.5 meters by the year 2100 under high-emission scenarios, threatening hundreds of coastal cities and hundreds of millions of people worldwide. Ocean acidification driven by increased CO2 absorption is already devastating marine ecosystems. Coral reef bleaching events have become five times more frequent since the 1980s, with the Great Barrier Reef experiencing four mass bleaching events in just six years. The study authors urge immediate and sustained deployment of renewable energy, carbon capture and storage technologies, and large-scale nature-based solutions such as reforestation, wetland restoration, and soil carbon sequestration. They emphasize that limiting warming to 1.5 degrees Celsius — the critical threshold identified by the Intergovernmental Panel on Climate Change — remains physically possible but requires transformational changes to energy systems, agriculture, transportation, and land use within this decade.`,
+      business: `Third quarter 2024 financial results for GlobalTech Corporation significantly exceeded analyst consensus expectations across all major business segments. Total revenue reached 4.7 billion dollars, representing a 12 percent increase year over year, driven primarily by exceptional performance in the cloud services division which grew 28 percent to 1.9 billion dollars as enterprise customers accelerated their digital transformation initiatives. Operating margins improved to 22 percent from 19 percent in the same period last year, reflecting successful cost optimization programs, strategic workforce rebalancing, and a favorable product mix shift toward higher-margin software subscription offerings. The legacy hardware segment experienced a 5 percent revenue decline due to continued supply chain normalization after pandemic-era shortages and softening enterprise demand for on-premise infrastructure as cloud adoption accelerates. In a significant strategic move, GlobalTech announced the acquisition of DataPulse Analytics, a leading real-time data intelligence platform, for 340 million dollars in an all-cash transaction expected to close in the first quarter of 2025, pending customary regulatory approvals. The acquisition is expected to be accretive to earnings within 18 months and will significantly strengthen GlobalTech's competitive position in the rapidly growing data analytics market. Management raised full-year revenue guidance to between 18.2 and 18.6 billion dollars, up from the prior guidance range of 17.8 to 18.2 billion dollars, citing healthy enterprise sales pipeline momentum and recently signed expanded multi-year contracts in the financial services and healthcare verticals. The board of directors approved an additional 500 million dollar share repurchase authorization. Total headcount grew 3 percent sequentially to 47,200 employees globally, with hiring concentrated in AI research, cloud infrastructure engineering, and customer success roles.`,
+      history: `The Renaissance, which flourished from the 14th through the 17th centuries, represents one of the most profound cultural and intellectual transformations in human history. Beginning in the city-states of northern Italy, particularly Florence under the patronage of the powerful Medici banking family, it marked humanity's conscious departure from the medieval worldview and a passionate rediscovery of classical Greek and Roman civilization. Renaissance thinkers championed humanism, a philosophical approach that placed human experience, dignity, and rational inquiry at the center of intellectual life, in contrast to the medieval emphasis on theological authority and divine revelation. In art, revolutionary figures like Leonardo da Vinci, Michelangelo, and Raphael developed linear perspective, mastered human anatomy through direct observation and dissection, and created works of breathtaking realism and emotional depth that still define Western artistic ideals. In science and natural philosophy, Copernicus proposed heliocentrism, overturning the Earth-centered cosmos of antiquity, while Galileo Galilei used the telescope to gather empirical evidence supporting this model, directly challenging Church authority and establishing the principle that observation must take precedence over received wisdom. The invention of the movable-type printing press by Johannes Gutenberg around 1440 proved catalytic, making books affordable and widely available for the first time in history, accelerating the spread of humanist ideas across Europe, enabling the Protestant Reformation, and ultimately democratizing knowledge itself. The Renaissance did not emerge in isolation but was shaped by trade networks connecting Europe to the Arab world and Byzantium, the influx of Greek scholars fleeing the Ottoman conquest of Constantinople in 1453, and the enormous wealth generated by Mediterranean commerce. Its legacy — empirical science, secular thought, individualism, and artistic naturalism — laid the intellectual foundations for the Scientific Revolution, the Enlightenment, and modern Western civilization.`
+    };
+
+    // ── STOP WORDS ────────────────────────────────────────────────────────────
+    const STOP = new Set([
+      'a','an','the','and','but','or','for','nor','so','yet','at','by','in',
+      'of','on','to','up','as','is','it','its','be','was','are','were','been',
+      'has','have','had','do','does','did','will','would','could','should',
+      'may','might','shall','can','this','that','these','those','i','we','he',
+      'she','they','you','me','him','her','us','them','my','our','his','their',
+      'your','who','which','what','when','where','how','if','not','no','also',
+      'just','with','from','into','than','then','there','their','about','after',
+      'before','between','during','through','under','over','such','each','more',
+      'most','other','some','all','one','two','first','last','new','while','both'
+    ]);
+
+    // ── NLP ENGINE ────────────────────────────────────────────────────────────
+    function tokenize(text) {
+      return text.toLowerCase().match(/\b[a-z][a-z']{2,}\b/g) || [];
+    }
+
+    function sentenceSplit(text) {
+      return text
+        .replace(/([.!?])\s+/g, '$1\n')
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 25 && s.split(' ').length > 4);
+    }
+
+    function computeTFIDF(sentences) {
+      const docFreq = {};
+      const sentTokens = sentences.map(s => {
+        const toks = tokenize(s).filter(w => !STOP.has(w));
+        toks.forEach(w => { docFreq[w] = (docFreq[w] || 0) + 1; });
+        return toks;
+      });
+      const N = sentences.length;
+      const scores = sentences.map((s, i) => {
+        const toks = sentTokens[i];
+        if (!toks.length) return 0;
+        const tf = {};
+        toks.forEach(w => { tf[w] = (tf[w] || 0) + 1; });
+        let score = 0;
+        for (const w in tf) {
+          const tfScore = tf[w] / toks.length;
+          const idfScore = Math.log((N + 1) / (docFreq[w] + 1)) + 1;
+          score += tfScore * idfScore;
+        }
+        // position bonus: first & last sentences carry weight
+        if (i === 0) score *= 1.4;
+        if (i === sentences.length - 1) score *= 1.1;
+        // length penalty: very short sentences are less informative
+        if (toks.length < 6) score *= 0.7;
+        return score;
+      });
+      return scores;
+    }
+
+    function extractKeywords(text, topN = 8) {
+      const toks = tokenize(text).filter(w => !STOP.has(w));
+      const freq = {};
+      toks.forEach(w => { freq[w] = (freq[w] || 0) + 1; });
+      return Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, topN)
+        .map(([w]) => w);
+    }
+
+    function summarize(text, mode, lengthLevel) {
+      const sentences = sentenceSplit(text);
+      if (sentences.length < 3) return { html: text, plain: text, count: sentences.length };
+
+      const scores = computeTFIDF(sentences);
+      const indexed = sentences.map((s, i) => ({ s, score: scores[i], i }));
+      const sorted = [...indexed].sort((a, b) => b.score - a.score);
+
+      // how many sentences to pick based on slider
+      const ratios = [0.1, 0.18, 0.27, 0.38, 0.5];
+      const ratio = ratios[lengthLevel - 1];
+      let nSents = Math.max(1, Math.round(sentences.length * ratio));
+
+      // mode-specific overrides
+      if (mode === 'tldr') nSents = Math.min(2, nSents);
+      if (mode === 'concise') nSents = Math.min(Math.max(2, nSents), 3);
+      if (mode === 'detailed') nSents = Math.max(nSents, Math.min(6, sentences.length));
+      if (mode === 'bullets') nSents = Math.min(Math.max(3, nSents), 7);
+
+      const picked = sorted.slice(0, nSents).sort((a, b) => a.i - b.i);
+
+      let html = '';
+      let plain = '';
+
+      if (mode === 'bullets') {
+        html = picked.map(({ s }) =>
+          `<div class="bullet-item"><div class="bullet-dot"></div><div>${s}</div></div>`
+        ).join('');
+        plain = picked.map(({ s }) => `• ${s}`).join('\n');
+      } else if (mode === 'keywords') {
+        const topSents = sorted.slice(0, Math.min(4, sorted.length)).sort((a, b) => a.i - b.i);
+        html = topSents.map(({ s }) => `<span class="highlight">${s}</span>`).join('');
+        plain = topSents.map(({ s }) => s).join('\n\n');
+      } else {
+        const joined = picked.map(({ s }) => s).join(' ');
+        html = `<span>${joined}</span>`;
+        plain = joined;
+      }
+
+      return { html, plain, count: nSents };
+    }
+
+    // ── UI STATE ──────────────────────────────────────────────────────────────
+    let currentMode = 'concise';
+
+    const inputEl = document.getElementById('inputText');
+    const charEl = document.getElementById('charCount');
+    const sliderEl = document.getElementById('lengthSlider');
+    const sliderLbl = document.getElementById('sliderLabel');
+    const procLabel = document.getElementById('procLabel');
+    const procBarWrap = document.getElementById('procBarWrap');
+    const procBar = document.getElementById('procBar');
+    const errorBox = document.getElementById('errorBox');
+    const errorMsg = document.getElementById('errorMsg');
+    const resultSection = document.getElementById('resultSection');
+    const resultText = document.getElementById('resultText');
+    const kwWrap = document.getElementById('keywordsWrap');
+    const kwTags = document.getElementById('kwTags');
+
+    const sliderLabels = ['Very Short', 'Short', 'Medium', 'Long', 'Very Long'];
+    sliderEl.addEventListener('input', () => {
+      sliderLbl.textContent = sliderLabels[sliderEl.value - 1];
+    });
+
+    inputEl.addEventListener('input', updateWordCount);
+    function updateWordCount() {
+      const words = inputEl.value.trim().split(/\s+/).filter(Boolean).length;
+      charEl.textContent = words.toLocaleString() + ' words';
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+      });
+    });
+
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        inputEl.value = samples[chip.dataset.sample];
+        updateWordCount();
+        hideError();
+        resultSection.classList.remove('show');
+      });
+    });
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      inputEl.value = '';
+      updateWordCount();
+      hideError();
+      resultSection.classList.remove('show');
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const text = resultText.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+        btn.style.color = 'var(--accent-light)';
+        btn.style.borderColor = 'var(--accent-light)';
+        setTimeout(() => {
+          btn.innerHTML = '<i class="ti ti-copy"></i> Copy';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 2000);
+      });
+    });
+
+    // ── ANIMATE PROGRESS BAR ─────────────────────────────────────────────────
+    function animateProgress(steps, labels, cb) {
+      let idx = 0;
+      procLabel.classList.add('show');
+      procBarWrap.classList.add('show');
+      procBar.style.width = '0%';
+
+      function step() {
+        if (idx >= steps.length) { cb(); return; }
+        procLabel.textContent = labels[idx];
+        setTimeout(() => {
+          procBar.style.width = steps[idx] + '%';
+          idx++;
+          setTimeout(step, 280);
+        }, 80);
+      }
+      step();
+    }
+
+    function hideProgress() {
+      procLabel.classList.remove('show');
+      procBarWrap.classList.remove('show');
+      procBar.style.width = '0%';
+    }
+
+    // ── MAIN SUMMARIZE ────────────────────────────────────────────────────────
+    document.getElementById('summarizeBtn').addEventListener('click', () => {
+      const text = inputEl.value.trim();
+      if (!text) return showError('Please paste some text first.');
+      const wordCount = text.split(/\s+/).filter(Boolean).length;
+      if (wordCount < 30) return showError('Please paste at least 30 words for a meaningful summary.');
+
+      hideError();
+      resultSection.classList.remove('show');
+      document.getElementById('summarizeBtn').disabled = true;
+
+      animateProgress(
+        [20, 45, 70, 90, 100],
+        ['Tokenizing text…', 'Computing TF-IDF scores…', 'Ranking sentences…', 'Selecting key content…', 'Done!'],
+        () => {
+          setTimeout(() => {
+            hideProgress();
+            document.getElementById('summarizeBtn').disabled = false;
+
+            const level = parseInt(sliderEl.value);
+            const { html, plain, count } = summarize(text, currentMode, level);
+            const origWords = wordCount;
+            const sumWords = plain.split(/\s+/).filter(Boolean).length;
+            const reduction = Math.max(0, Math.round((1 - sumWords / origWords) * 100));
+
+            resultText.innerHTML = html;
+
+            // Keywords
+            const kws = extractKeywords(text);
+            kwTags.innerHTML = kws.map(k => `<span class="kw-tag">${k}</span>`).join('');
+            kwWrap.style.display = (currentMode === 'keywords') ? 'none' : 'block';
+
+            document.getElementById('statOrig').textContent = origWords.toLocaleString();
+            document.getElementById('statSum').textContent = sumWords.toLocaleString();
+            document.getElementById('statSents').textContent = count;
+            document.getElementById('statReduced').textContent = reduction + '%';
+
+            resultSection.classList.add('show');
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 200);
+        }
+      );
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorBox.classList.add('show');
+    }
+    function hideError() {
+      errorBox.classList.remove('show');
+    }
+  </script>
+</body>
+</html>
