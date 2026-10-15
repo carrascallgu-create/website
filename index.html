@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tidepool – split house bills without the awkward texts</title>
+<meta name="description" content="Tidepool tracks shared bills for roommates and tells everyone exactly who owes what.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E6ECE4; --surface:#F6F8F4; --ink:#16251E; --muted:#51615A; --accent:#2D3FE0; --accent-ink:#fff; --line:#C5D0C6; --err:#B3261E;
+  --head:"Bricolage Grotesque",system-ui,sans-serif; --body:"Newsreader",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#101A15;--surface:#18261F;--ink:#E7EFE8;--muted:#9DB0A5;--accent:#8E9BFF;--accent-ink:#0E1330;--line:#2B3D33;--err:#FF8A80}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:20px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+header{display:flex;justify-content:space-between;align-items:center;padding:28px 0}
+.logo{font:800 24px var(--head);text-decoration:none;letter-spacing:-.02em}
+nav a{font:500 16px var(--head);margin-left:24px;text-decoration:none;color:var(--muted)}
+nav a:hover{color:var(--ink)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:56px;align-items:center;padding:56px 0 88px}
+h1{font:800 clamp(44px,7vw,84px)/.98 var(--head);letter-spacing:-.035em;margin:0 0 24px}
+.lede{color:var(--muted);max-width:30ch;margin:0 0 32px;font-size:22px}
+.btn{font:500 17px var(--head);background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:14px 22px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(1.1)}
+.btn[disabled]{opacity:.6;cursor:wait}
+
+/* live splitter */
+.split{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px}
+.split h2{font:500 16px var(--head);margin:0 0 18px;color:var(--muted)}
+.row{display:flex;gap:12px;margin-bottom:16px}
+label{font:500 15px var(--head);display:block;margin-bottom:6px}
+input{font:inherit;font-size:18px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.result{border-top:1px dashed var(--line);margin-top:8px;padding-top:18px;font:500 15px var(--head);color:var(--muted)}
+.result strong{display:block;font:800 48px/1 var(--head);color:var(--ink);letter-spacing:-.03em;margin-top:4px}
+
+section{padding:72px 0;border-top:1px solid var(--line)}
+h2.title{font:800 clamp(30px,4vw,44px)/1.05 var(--head);letter-spacing:-.025em;margin:0 0 40px;max-width:18ch}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.features h3{font:800 20px var(--head);margin:0 0 8px}
+.features p{margin:0;color:var(--muted);font-size:18px}
+.faq details{border-bottom:1px solid var(--line);padding:18px 0}
+.faq summary{font:500 19px var(--head);cursor:pointer}
+.faq p{color:var(--muted);margin:10px 0 0;max-width:60ch}
+
+.signup form{display:flex;gap:12px;max-width:560px}
+.signup input{flex:1}
+#msg{min-height:1.6em;margin:14px 0 0;font:500 16px var(--head)}
+#msg.ok{color:var(--accent)} #msg.bad{color:var(--err)}
+.hp{position:absolute;left:-9999px}
+footer{padding:40px 0;color:var(--muted);font:400 15px var(--head);border-top:1px solid var(--line)}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;gap:40px;padding-bottom:56px}
+  .features{grid-template-columns:1fr;gap:28px}
+  .signup form{flex-direction:column}
+  nav a{margin-left:16px}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="logo" href="#">Tidepool</a>
+    <nav><a href="#features">Features</a><a href="#faq">FAQ</a><a href="#signup">Join waitlist</a></nav>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Split the rent. Keep the friendship.</h1>
+        <p class="lede">Tidepool tracks every shared bill and tells each roommate exactly what they owe.</p>
+        <a class="btn" href="#signup">Join the waitlist</a>
+      </div>
+
+      <div class="split" aria-labelledby="split-h">
+        <h2 id="split-h">Try it: split a bill</h2>
+        <div class="row">
+          <div style="flex:2"><label for="amt">Bill total</label><input id="amt" type="number" min="0" step="0.01" value="180" inputmode="decimal"></div>
+          <div style="flex:1"><label for="ppl">People</label><input id="ppl" type="number" min="1" max="20" value="3" inputmode="numeric"></div>
+        </div>
+        <div class="result" aria-live="polite">Each person pays<strong id="each">$60.00</strong></div>
+      </div>
+    </div>
+
+    <section id="features">
+      <h2 class="title">Everything a shared home needs</h2>
+      <div class="features">
+        <div><h3>One shared ledger</h3><p>Rent, power, internet, groceries. Add a bill in seconds and everyone sees it.</p></div>
+        <div><h3>Fair splits</h3><p>Split evenly, by percentage, or by room size. Change it per bill.</p></div>
+        <div><h3>Gentle reminders</h3><p>Tidepool nudges people who owe, so you never have to.</p></div>
+      </div>
+    </section>
+
+    <section id="faq" class="faq">
+      <h2 class="title">Questions</h2>
+      <details><summary>When does Tidepool launch?</summary><p>We're opening to the waitlist in small groups. Sign up below and we'll email you when your spot is ready.</p></details>
+      <details><summary>Is it free?</summary><p>Households of up to four people will be free. We'll share pricing for larger groups before launch.</p></details>
+      <details><summary>Do my roommates need an account?</summary><p>They can join from an invite link and see only their own household.</p></details>
+    </section>
+
+    <section id="signup" class="signup">
+      <h2 class="title">Get early access</h2>
+      <form id="form" novalidate>
+        <label for="email" class="hp-label" style="position:absolute;left:-9999px">Email address</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+        <input class="hp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn" id="submit" type="submit">Join the waitlist</button>
+      </form>
+      <p id="msg" role="status"></p>
+    </section>
+  </main>
+
+  <footer>© <span id="yr"></span> Tidepool. Built to be forked and renamed.</footer>
+</div>
+
+<script>
+// Bill splitter
+const amt = document.getElementById('amt'), ppl = document.getElementById('ppl'), each = document.getElementById('each');
+function calc(){
+  const a = parseFloat(amt.value), p = parseInt(ppl.value, 10);
+  each.textContent = (a >= 0 && p >= 1)
+    ? (a / p).toLocaleString(undefined, {style:'currency', currency:'USD'})
+    : '—';
+}
+amt.addEventListener('input', calc); ppl.addEventListener('input', calc); calc();
+
+// Waitlist form
+const form = document.getElementById('form'), msg = document.getElementById('msg'), btn = document.getElementById('submit');
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form));
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email || '')) {
+    msg.className = 'bad'; msg.textContent = 'Enter a valid email address, like you@example.com.'; return;
+  }
+  btn.disabled = true; msg.className = ''; msg.textContent = 'Saving…';
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const out = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(out.error || 'Something went wrong. Try again in a minute.');
+    msg.className = 'ok'; msg.textContent = "You're on the list. We'll email you when your spot opens.";
+    form.reset();
+  } catch (err) {
+    msg.className = 'bad'; msg.textContent = err.message;
+  } finally { btn.disabled = false; }
+});
+document.getElementById('yr').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
